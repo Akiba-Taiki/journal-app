@@ -96,6 +96,15 @@ export function calcStreak(habitId: string, today: string): number {
   return streak
 }
 
+// --- スタートからの経過日数 ---
+
+export function calcDaysSinceStart(startDate: string, today: string): number {
+  const start = new Date(startDate)
+  const end = new Date(today)
+  const diff = end.getTime() - start.getTime()
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)) + 1)
+}
+
 // --- Markdownエクスポート ---
 
 export function exportToMarkdown(from: string, to: string): string {
