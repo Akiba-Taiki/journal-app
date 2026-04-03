@@ -5,6 +5,7 @@ import RecordForm from '@/components/RecordForm'
 import CalendarView from '@/components/CalendarView'
 import HabitManager from '@/components/HabitManager'
 import ExportModal from '@/components/ExportModal'
+import AuthButton from '@/components/AuthButton'
 
 type Tab = 'record' | 'calendar' | 'habits'
 
@@ -14,9 +15,14 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>('record')
   const [showExport, setShowExport] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [syncKey, setSyncKey] = useState(0)
 
   function handleSaved() {
     setRefreshKey(k => k + 1)
+  }
+
+  function handleSynced() {
+    setSyncKey(k => k + 1)
   }
 
   function handleSelectDate(date: string) {
@@ -30,12 +36,15 @@ export default function Home() {
         {/* ヘッダー */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-stone-800">あきばの日記 📓</h1>
-          <button
-            onClick={() => setShowExport(true)}
-            className="text-xs text-stone-400 border border-stone-200 px-3 py-1.5 rounded-xl hover:bg-stone-100"
-          >
-            エクスポート
-          </button>
+          <div className="flex items-center gap-2">
+            <AuthButton onSynced={handleSynced} />
+            <button
+              onClick={() => setShowExport(true)}
+              className="text-xs text-stone-400 border border-stone-200 px-3 py-1.5 rounded-xl hover:bg-stone-100"
+            >
+              エクスポート
+            </button>
+          </div>
         </div>
 
         {/* タブ */}
@@ -60,7 +69,7 @@ export default function Home() {
         {/* コンテンツ */}
         {tab === 'record' && (
           <RecordForm
-            key={selectedDate}
+            key={`${selectedDate}-${syncKey}`}
             date={selectedDate}
             onSaved={handleSaved}
           />
@@ -69,7 +78,7 @@ export default function Home() {
         {tab === 'calendar' && (
           <div className="space-y-4">
             <CalendarView
-              key={refreshKey}
+              key={`${refreshKey}-${syncKey}`}
               onSelectDate={handleSelectDate}
               selectedDate={selectedDate}
             />
@@ -79,7 +88,7 @@ export default function Home() {
           </div>
         )}
 
-        {tab === 'habits' && <HabitManager />}
+        {tab === 'habits' && <HabitManager key={syncKey} />}
       </div>
 
       {/* 今日以外を選んでいるときに「今日に戻る」ボタン */}

@@ -1,4 +1,5 @@
 import { JournalEntry, Habit } from './types'
+import { supabase } from './supabase'
 
 const ENTRIES_KEY = 'journal_entries'
 const HABITS_KEY = 'journal_habits'
@@ -20,6 +21,18 @@ export function saveEntry(entry: JournalEntry): void {
   const all = getAllEntries()
   all[entry.date] = entry
   localStorage.setItem(ENTRIES_KEY, JSON.stringify(all))
+  // ログイン中はSupabaseにバックグラウンド同期
+  if (supabase) {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase!.from('journal_entries').upsert({
+        user_id: user.id,
+        date: entry.date,
+        data: entry,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,date' })
+    })
+  }
 }
 
 export function getEmptyEntry(date: string): JournalEntry {
@@ -57,6 +70,23 @@ export function getHabits(): Habit[] {
 
 export function saveHabits(habits: Habit[]): void {
   localStorage.setItem(HABITS_KEY, JSON.stringify(habits))
+  // ログイン中はSupabaseにバックグラウンド同期
+  if (supabase) {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase!.from('habits').delete().eq('user_id', user.id).then(() => {
+        if (habits.length === 0) return
+        supabase!.from('habits').insert(
+          habits.map(h => ({
+            user_id: user.id,
+            id: h.id,
+            name: h.name,
+            start_date: h.startDate,
+          }))
+        )
+      })
+    })
+  }
 }
 
 export function addHabit(name: string, startDate: string): Habit {
