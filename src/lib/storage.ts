@@ -162,11 +162,12 @@ export function exportToMarkdown(from: string, to: string): string {
     lines.push(`2. 自分がちょっとかっこよかったこと：${e.threeGood.proudMoment || '未記録'}`)
     lines.push(`3. 明日の自分に一言：${e.threeGood.messageToTomorrow || '未記録'}`)
 
-    if (e.journaling.emotionAndReason || e.journaling.insight || e.journaling.onMind) {
+    if (e.journaling.mainEvents || e.journaling.emotionAndReason || e.journaling.insight || e.journaling.onMind) {
       lines.push(`\n### Journaling`)
+      if (e.journaling.mainEvents) lines.push(`- 今日の主な出来事：${e.journaling.mainEvents}`)
       if (e.journaling.emotionAndReason) lines.push(`- 感じた感情と理由：${e.journaling.emotionAndReason}`)
       if (e.journaling.insight) lines.push(`- 今日の気づき：${e.journaling.insight}`)
-      if (e.journaling.onMind) lines.push(`- 気になること：${e.journaling.onMind}`)
+      if (e.journaling.onMind) lines.push(`- 最近気になっていること・もやもや：${e.journaling.onMind}`)
     }
 
     lines.push(`\n### 今日の気分：${e.moodEndOfDay ?? '未記録'}`)
